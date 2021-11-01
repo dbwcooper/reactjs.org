@@ -8,12 +8,12 @@
       "path": "",
       "routes": [
         {
-          "title": "Installation",
+          "title": "CSS",
           "path": "/learn/installation",
           "routes": [
             {
-              "title": "Start a New React Project",
-              "path": "/learn/start-a-new-react-project"
+              "title": "How to use flex",
+              "path": "/learn/how-to-use-flex"
             },
             {
               "title": "Add React to a Website",
