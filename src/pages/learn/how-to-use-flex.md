@@ -9,21 +9,146 @@ flex 是一个二维布局系统，有横向和纵向两个布局方向。
 
 <Sandpack>
 
-```js
+```js App.js active
+import FlexRow from './FlexRow.js';
+import FlexColumn from './FlexColumn.js';
+export default function App() {
+  return (
+    <>
+      <FlexRow />
+      <FlexColumn />
+    </>
+  );
+}
+```
+
+```js FlexRow.js active
 const style = {
   display: 'flex',
   width: 200,
-  'justify-content': 'space-between'
-}
-export default function Profile() {
+  border: '1px solid #9CA3AF',
+  margin: '4px',
+  padding: '6px',
+  'justify-content': 'space-between',
+};
+export default function FlexRow() {
   return (
     <div style={style}>
-      <div style={{ border: '1px solid', padding: '10px'}}>box1</div>
-      <div style={{ border: '1px solid', padding: '10px'}}>box2</div>
+      <div style={{border: '1px solid #D1D5DB', padding: '10px'}}>box1</div>
+      <div style={{border: '1px solid #D1D5DB', padding: '10px'}}>box2</div>
     </div>
   );
 }
 ```
+
+```js FlexColumn.js
+const style = {
+  display: 'flex',
+  'flex-direction': 'column',
+  margin: '4px',
+  width: 200,
+  border: '1px solid #9CA3AF',
+  padding: '6px',
+  'justify-content': 'space-between',
+};
+export default function FlexColumn() {
+  return (
+    <div style={style}>
+      <div style={{border: '1px solid #D1D5DB', padding: '10px'}}>box1</div>
+      <div style={{border: '1px solid #D1D5DB', padding: '10px'}}>box2</div>
+    </div>
+  );
+}
+```
+
+</Sandpack>
+
+## flex 属性特点
+
+- flex 属性 **一位** 表示法
+
+  - 值为数字时，表示 flex-grow,
+  - 值为非数字时，表示 flex-basic
+
+  ```css
+  flex: 0; // flex: 0 1 0%;
+  flex: 1; // flex: 1 1 0%;
+  flex: auto; // flex: 1 1 auto;
+  flex: 10px; // flex: 0 1 10px;
+  ```
+
+- flex 属性 **二位** 表示法
+
+  - 第一个值为 flex-grow
+  - 第二个值为数字时表示 flex-shrink, 非数字时表示 flex-basic
+
+  ```css
+  flex: 0 auto; === flex 0 1 auto;
+  flex: 1 2; === flex 1 2 0%;
+  flex: 2 10px; === flex 2 1 10px;
+  ```
+
+- flex-basic 不同值的区别
+  - auto
+  - 0%
+
+<Sandpack>
+
+```js App.js active
+import FlexBasicAuto from './FlexBasic-auto.js';
+import FlexBasic0 from './FlexBasic-0.js';
+export default function App() {
+  return (
+    <>
+      <FlexBasicAuto />
+      <FlexBasic0 />
+    </>
+  );
+}
+```
+
+```js FlexBasic-auto.js
+export default function FlexBasicAuto() {
+  const style = {
+    display: 'flex',
+    'flex-direction': 'column',
+    margin: '4px',
+    width: 200,
+    border: '1px solid #9CA3AF',
+    padding: '6px',
+    'justify-content': 'space-between',
+  };
+  const boxStyle = {border: '1px solid #D1D5DB', padding: '10px', flex: 'auto'};
+  return (
+    <div style={style}>
+      <div style={boxStyle}>box1</div>
+      <div style={boxStyle}>box2</div>
+    </div>
+  );
+}
+```
+
+```js FlexBasic-0.js
+export default function FlexBasic0() {
+  const style = {
+    display: 'flex',
+    'flex-direction': 'column',
+    margin: '4px',
+    width: 200,
+    border: '1px solid #9CA3AF',
+    padding: '6px',
+    'justify-content': 'space-between',
+  };
+  const boxStyle = {border: '1px solid #D1D5DB', padding: '10px', flex: 0};
+  return (
+    <div style={style}>
+      <div style={boxStyle}>box1</div>
+      <div style={boxStyle}>box2</div>
+    </div>
+  );
+}
+```
+
 </Sandpack>
 
 ## flex 的计算规则
