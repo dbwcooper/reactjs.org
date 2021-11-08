@@ -89,8 +89,8 @@ export default function FlexColumn() {
   ```
 
 - flex-basic 不同值的区别
-  - auto
-  - 0%
+  - auto, 元素将尽可能的去获取父容器的剩余空间。
+  - 0, 将被解释为 width:0; 从而将元素折叠到给定内容的最小可能宽度
 
 <Sandpack>
 
@@ -111,14 +111,13 @@ export default function App() {
 export default function FlexBasicAuto() {
   const style = {
     display: 'flex',
-    'flex-direction': 'column',
     margin: '4px',
     width: 200,
     border: '1px solid #9CA3AF',
     padding: '6px',
     'justify-content': 'space-between',
   };
-  const boxStyle = {border: '1px solid #D1D5DB', padding: '10px', flex: 'auto'};
+  const boxStyle = {flex: 'auto', border: '1px solid #D1D5DB', padding: '10px'};
   return (
     <div style={style}>
       <div style={boxStyle}>box1</div>
@@ -132,14 +131,13 @@ export default function FlexBasicAuto() {
 export default function FlexBasic0() {
   const style = {
     display: 'flex',
-    'flex-direction': 'column',
     margin: '4px',
     width: 200,
     border: '1px solid #9CA3AF',
     padding: '6px',
     'justify-content': 'space-between',
   };
-  const boxStyle = {border: '1px solid #D1D5DB', padding: '10px', flex: 0};
+  const boxStyle = {flex: 0, border: '1px solid #D1D5DB', padding: '10px'};
   return (
     <div style={style}>
       <div style={boxStyle}>box1</div>
@@ -151,73 +149,183 @@ export default function FlexBasic0() {
 
 </Sandpack>
 
+## flex 与 margin
+
+flex 子元素可以结合 margin 实现更灵活的布局
+
+- 主轴为横向时，可以配置使用 margin-left, margin-right
+- 主轴为纵向时，可以配置使用 margin-top, margin-bottom
+
+<Sandpack>
+
+```js App.js
+import Row from './Row.js';
+import Column from './Column.js';
+export default function App() {
+  return (
+    <div>
+      <Row />
+      <Column />
+    </div>
+  );
+}
+```
+
+```js Row.js
+export default function Row() {
+  const style = {
+    display: 'flex',
+    margin: '4px',
+    border: '1px solid #9CA3AF',
+    padding: '6px',
+    'justify-content': 'space-between',
+  };
+  const boxStyle = {border: '1px solid #D1D5DB', padding: '10px', flex: 0};
+  return (
+    <div style={style}>
+      <div style={boxStyle}>box1</div>
+      <div style={{...boxStyle, 'margin-left': 'auto'}}>box2</div>
+      <div style={boxStyle}>box3</div>
+    </div>
+  );
+}
+```
+
+```js Column.js
+export default function Column() {
+  const style = {
+    display: 'flex',
+    height: 200,
+    'flex-direction': 'column',
+    margin: '4px',
+    border: '1px solid #9CA3AF',
+    padding: '6px',
+    'justify-content': 'space-between',
+  };
+  const boxStyle = {border: '1px solid #D1D5DB', padding: '10px', flex: 0};
+  return (
+    <div style={style}>
+      <div style={boxStyle}>box1</div>
+      <div style={{...boxStyle, 'margin-top': 'auto'}}>box2</div>
+      <div style={boxStyle}>box3</div>
+    </div>
+  );
+}
+```
+
+</Sandpack>
+
 ## flex 的计算规则
 
-flex 有一些隐形的计算规则， 在对 flex 子项进行 flex-grow, flex-shrink 分派时，有不同的计算规则
+flex 有一些隐形的计算规则， flex-grow, flex-shrink 有不同的计算规则.
 
-- Start with a **minimal set up with just a toolchain,** adding features to your project as necessary.
-- Start with an **opinionated framework** with common functionality already built in.
+> 因为子元素未撑满容器，使用 flex-grow 规则
+> 权重计算公式： (200 - (子元素所有的 flex-basis 和)) / (子元素 flex-grow 和)
+> 权重 = 100/3 （auto === 0）
+> box1 = 1 \* 100/3 = 33.4
+> box2 = 2 \* 100/3 = 33.6
+> box3 = 3 \* 100/3 = 100
 
-Whether you're just getting started, looking to build something big, or want to set up your own toolchain, this guide will set you on the right path.
+<Sandpack>
 
-## Getting started with a React toolchain
+```js App.js active
+export default function App() {
+  const style = {
+    display: 'flex',
+    width: 200,
+    margin: '4px',
+    border: '1px solid #9CA3AF',
+  };
 
-If you're just getting started with React, we recommend [Create React App](https://create-react-app.dev/), the most popular way to try out React's features and a great way to build a new single-page, client-side application. Create React App is an unopinionated toolchain configured just for React. Toolchains help with things like:
+  const itemStyle = {
+    flex: 1,
+    'border-right': '1px solid #D1D5DB',
+    width: 40,
+  };
+  return (
+    <div style={style}>
+      <div style={{...itemStyle}}>40</div>
+      <div style={{...itemStyle, width: 40, flex: 2}}>40</div>
+      <div style={{...itemStyle, width: 40, flex: 3}}>40</div>
+    </div>
+  );
+}
+```
 
-- Scaling to many files and components
-- Using third-party libraries from npm
-- Detecting common mistakes early
-- Live-editing CSS and JS in development
-- Optimizing the output for production
+</Sandpack>
 
-You can get started building with Create React App with one line of code in your terminal! (**Be sure you have [Node.js](https://nodejs.org/) installed!**)
+> 因为子元素已经溢出了容器实际大小，使用 flex-shrink 规则
+> 预期宽度: 100 \* 1 + 100 \* 1 + 100 \* 2 = 400;
+> 溢出宽度: 100 + 100 + 100 - 200 = 100;
+> box1: 100 - (100 \* 1)/400 \* 100 = 75;
+> box2: 100 - (100 \* 2)/400 \* 100 = 50;
+> box3: 100 - (100 \* 1)/400 \* 100 = 75;
 
-<TerminalBlock>
+<Sandpack>
 
-npx create-react-app my-app
+```js App.js active
+import FlexBasisAuto from './flex-basis-auto.js';
+import FlexBasis0 from './flex-basis-0.js';
+export default function App() {
+  return (
+    <div>
+      <FlexBasisAuto />
+      <FlexBasis0 />
+    </div>
+  );
+}
+```
 
-</TerminalBlock>
+```js flex-basis-auto.js
+export default function App() {
+  const style = {
+    display: 'flex',
+    width: 200,
+    margin: '4px',
+    border: '1px solid #9CA3AF',
+  };
 
-Now you can run your app with:
+  const itemStyle = {
+    flex: 1,
+    borderRight: '1px solid #D1D5DB',
+    width: 100,
+  };
+  return (
+    <div style={style}>
+      <div style={{...itemStyle, flex: '1 1 auto'}}>100</div>
+      <div style={{...itemStyle, flex: '1 2 auto'}}>100</div>
+      <div style={{...itemStyle, flex: '2 1 auto', borderRight: 'none'}}>
+        100
+      </div>
+    </div>
+  );
+}
+```
 
-<TerminalBlock>
+```js flex-basis-0.js
+export default function App() {
+  const style = {
+    display: 'flex',
+    width: 200,
+    margin: '4px',
+    border: '1px solid #9CA3AF',
+  };
 
-cd my-app
-npm start
+  const itemStyle = {
+    flex: 1,
+    borderRight: '1px solid #D1D5DB',
+    width: 100,
+  };
+  return (
+    <div style={style}>
+      <div style={{...itemStyle, flex: '1 1 0'}}>100</div>
+      <div style={{...itemStyle, flex: '1 2 0'}}>100</div>
+      <div style={{...itemStyle, flex: '2 1 0', borderRight: 'none'}}>
+        100
+      </div>
+    </div>
+  );
+}
+```
 
-</TerminalBlock>
-
-For more information, [check out the the official guide](https://create-react-app.dev/docs/getting-started).
-
-> Create React App doesn't handle backend logic or databases; it just creates a frontend build pipeline. This means you can use it with any backend you want. But if you're looking for more features like routing and server-side logic, read on!
-
-### Other options
-
-Create React App is great to get started working with React, but if you'd like an even lighter toolchain, you might try one of these other popular toolchains:
-
-- [Vite](https://vitejs.dev/guide/)
-- [Parcel](https://parceljs.org/)
-- [Snowpack](https://www.snowpack.dev/tutorials/react)
-
-## Building with React and a framework
-
-If you're looking to start a bigger, production-ready project, [Next.js](https://nextjs.org/) is a great place to start. Next.js is a popular, lightweight framework for static and server‑rendered applications built with React. It comes pre-packaged with features like routing, styling, and server-side rendering, getting your project up and running quickly.
-
-[Get started building with Next.js](https://nextjs.org/docs/getting-started) with the official guide.
-
-### Other options
-
-- [Gatsby](https://www.gatsbyjs.org/) lets you generate static websites with React with GraphQL.
-- [Razzle](https://razzlejs.org/) is a server-rendering framework that doesn't require any configuration, but offers more flexibility than Next.js.
-
-## Custom toolchains
-
-You may prefer to create and configure your own toolchain. A JavaScript build toolchain typically consists of:
-
-- A **package manager**—lets you install, updated and manage third-party packages. [Yarn](https://yarnpkg.com/) and [npm](https://www.npmjs.com/) are two popular package managers.
-- A **bundler**—lets you write modular code and bundle it together into small packages to optimize load time. [Webpack](https://webpack.js.org/), [Snowpack](https://www.snowpack.dev/), [Parcel](https://parceljs.org/) are several popular bundlers.
-- A **compiler**—lets you write modern JavaScript code that still works in older browsers. [Babel](https://babeljs.io/) is one such example.
-
-In a larger project, you might also want to have a tool to manage multiple packages in a single repository. [Nx](https://nx.dev/react) is an example of such a tool.
-
-If you prefer to set up your own JavaScript toolchain from scratch, [check out this guide](https://blog.usejournal.com/creating-a-react-app-from-scratch-f3c693b84658) that re-creates some of the Create React App functionality.
+</Sandpack>
